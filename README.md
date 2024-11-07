@@ -15,8 +15,6 @@ This project provides a **location-based access form** using HTML, CSS, and Java
    git clone https://github.com/YOUR_USERNAME/responsive-form.git
    cd responsive-form
 
-Here’s the README.md updated for easy copy-pasting:
-
 # 🌍 Location-Based Form Access
 
 This project allows access to a Google Form based on the user's location, using HTML, CSS, and JavaScript. The form is only accessible within a specific radius from a designated location (configured via latitude and longitude). This is useful for location-restricted surveys, event check-ins, or any other form requiring geolocation verification.
