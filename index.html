@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location-Based Form Access</title>
+    <style>
+        /* CSS to make the iframe responsive */
+        .responsive-iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden;
+        }
+
+        .responsive-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Fill container */
+            border: 0;
+        }
+    </style>
+    <script>
+        // ========== USER CONFIGURATION ==========
+        
+        // Set your Google Form ID here
+        const GOOGLE_FORM_ID = "YOUR_GOOGLE_FORM_ID"; // e.g., "1FAIpQLSeKsXUy2tQXDdZbsgmRkDaRbAQpqSy_9L9eYqbKNXqBGM5S2Q"
+        
+        // Set the target location coordinates and radius in meters
+        const targetLatitude = -6.200000; // Example latitude
+        const targetLongitude = 106.816666; // Example longitude
+        const radiusInMeters = 50; // Radius in meters
+
+        // ========== END OF USER CONFIGURATION ==========
+
+        // Function to convert degrees to radians
+        function toRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        // Function to calculate distance using the Haversine Formula
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Radius of Earth in meters
+            const dLat = toRadians(lat2 - lat1);
+            const dLon = toRadians(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in meters
+        }
+
+        // Function to check user's location
+        function checkLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const userLat = position.coords.latitude;
+                    const userLon = position.coords.longitude;
+                    const distance = getDistance(targetLatitude, targetLongitude, userLat, userLon);
+
+                    if (distance <= radiusInMeters) {
+                        document.getElementById('accessForm').style.display = 'block';
+                        document.getElementById('accessDenied').style.display = 'none';
+                    } else {
+                        document.getElementById('accessForm').style.display = 'none';
+                        document.getElementById('accessDenied').style.display = 'block';
+                    }
+                }, function (error) {
+                    alert('Failed to retrieve location. Please enable location permissions.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+    </script>
+</head>
+<body onload="checkLocation()" style="margin: 0; padding: 0;">
+    <h1 style="text-align: center;">Location-Based Form Access</h1>
+
+    <!-- Message shown if access is denied due to location -->
+    <div id="accessDenied" style="display:none; text-align: center;">
+        <p>Access denied. This form can only be accessed within the specified location.</p>
+    </div>
+
+    <!-- Google Form iframe, shown only if within the specified location radius -->
+    <div id="accessForm" style="display:none;">
+        <div class="responsive-iframe-container">
+            <iframe src="" id="googleFormIframe" frameborder="0">Loading…</iframe>
+        </div>
+    </div>
+
+    <script>
+        // Set the Google Form iframe source dynamically
+        document.getElementById("googleFormIframe").src = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/viewform?embedded=true`;
+    </script>
+</body>
+</html>
